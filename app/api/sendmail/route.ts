@@ -273,7 +273,7 @@ export async function POST(req: NextRequest) {
                                       style="font-size:18px;line-height:24px;margin:0px;margin-top:8px;color:rgb(107,114,128)"
                                     >
                                       Name: ${name}</br>
-                                      Organization: ${link == '' ? `${org}` : `<a target="_blank" href="${link}">${org}</a>` }  </br>
+                                      Organization: ${link == '' ? `${org}` : `<a target="_blank" href="${link}">${org}</a>`}  </br>
                                       Email: ${email}</br>
                                       Phone: <a href="tel:${phone}">${phone}</a>
                                     </p>
@@ -338,11 +338,10 @@ export async function POST(req: NextRequest) {
                                     <p
                                       style="font-size:18px;line-height:24px;margin:0px;margin-top:8px;color:rgb(107,114,128)"
                                     >
-                                      ${
-                                        select.map((item: any, index: any)=> {
-                                          return `<p>${index + 1}. ${item}</p>`
-                                        })
-                                      }
+                                      ${select.map((item: any, index: any) => {
+        return `<p>${index + 1}. ${item}</p>`
+      })
+        }
                                     </p>
                                   </td>
                                 </tr>
@@ -500,7 +499,10 @@ export async function POST(req: NextRequest) {
     await transporter.sendMail(mailOptions);
 
     // Return a successful response
-    return NextResponse.json({ message: 'Email sent successfully!' });
+    return NextResponse.json(
+      { message: 'Sent email' },
+      { status: 200 }
+    );
   } catch (error: unknown) {
     console.error('Error sending email:', error);
     return NextResponse.json(

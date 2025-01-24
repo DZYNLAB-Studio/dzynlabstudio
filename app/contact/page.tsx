@@ -1,10 +1,20 @@
 "use client"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { GlowEffect } from '@/components/ui/glow-effect';
+
+
 import { Button } from "@/components/ui/button";
 import { useState } from "react"
 import Image from "next/image";
@@ -12,31 +22,30 @@ import Image from "next/image";
 
 
 export default function EmailForm() {
-    const [message, setMessage] = useState('');
+    const [open, setOpen] = useState(false);
     const [status, setStatus] = useState('');
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [org, setOrg] = useState('')
     const [link, setLink] = useState('');
-    const [budget,setBudget] = useState('');
-    const [referal,setReferal] = useState('');
+    const [budget, setBudget] = useState('');
+    const [referal, setReferal] = useState('');
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
 
     const handleCheckboxChange = (service: string) => {
         setSelectedServices((prev) =>
-          prev.includes(service)
-            ? prev.filter((item) => item !== service) // Remove if already selected
-            : [...prev, service] // Add if not selected
+            prev.includes(service)
+                ? prev.filter((item) => item !== service) // Remove if already selected
+                : [...prev, service] // Add if not selected
         );
-      };
-    
+    };
 
-    const sendEmail = async (e: { preventDefault: () => void; }) => {
+
+    const sendEmail = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
         setStatus('Sending...');
-
 
         try {
             const response = await fetch('/api/sendmail', {
@@ -47,54 +56,62 @@ export default function EmailForm() {
                 body: JSON.stringify({
                     to: 'dzynlabstudio@gmail.com',
                     subject: 'WORK!',
-                    email: email,
-                    name: name,
-                    phone: phone,
-                    org: org,
-                    link: link,
-                    budget: budget,
-                    referal: referal,
-                    select: selectedServices
+                    email,
+                    name,
+                    phone,
+                    org,
+                    link,
+                    budget,
+                    referal,
+                    select: selectedServices,
                 }),
             });
 
-            if (response.ok) {
-                setStatus('Email sent successfully!');
+            if (response.ok) { // Use response.ok to simplify status check
+                const responseData = await response.json(); // Parse response JSON if necessary
+                console.log('Response:', responseData); // Log the response for debugging
+                setStatus('Email sent successfully.');
+                // Redirect after a successful response
+                window.location.href = '/contact/success';
             } else {
+                const errorData = await response.json(); // Optional: fetch error details from server
+                console.error('Error Response:', errorData);
                 setStatus('Failed to send email.');
+                setOpen(true);
             }
         } catch (error) {
             setStatus('Error occurred while sending email.');
-            console.error(error);
+            console.error('Catch Error:', error);
+            setOpen(true);
         }
-       
     };
+
 
     return (
         <div className="flex flex-col lg:flex-row w-full h-full justify-between items-center">
             <div className="max-w-xl mx-auto p-6 border rounded-md shadow-md">
                 <div className="flex justify-between">
-                <h1 className="text-2xl font-bold mb-6 w-3">GET IN TOUCH</h1>
-                <div className="hidden md:block">
-                    <Image
-                        src="/logo.png" // Path to your desktop image
-                        alt="Desktop Image"
-                        width={150}
-                        height={150}
-                        priority // Load faster for above-the-fold
-                    />
-                </div>
+                    <h1 className="text-2xl font-bold mb-6 w-3">GET IN TOUCH</h1>
+                    <div className="hidden md:block">
+                        <Image
+                            src="/logo.png" // Path to your desktop image
+                            alt="Desktop Image"
+                            width={150}
+                            height={150}
+                            priority // Load faster for above-the-fold
+                        />
+                    </div>
 
-                {/* Mobile Image */}
-                <div className="block md:hidden">
-                    <Image
-                        src="/logo.png" // Path to your mobile image
-                        alt="Mobile Image"
-                        width={120}
-                        height={120}
-                        priority
-                    />
-                </div>
+                    {/* Mobile Image */}
+                    <div className="block md:hidden">
+                        <Image
+                            src="/logo.png" // Path to your mobile image
+                            alt="Mobile Image"
+                            width={120}
+                            height={120}
+                            priority
+                        />
+                    </div>
                 </div>
                 <form className="space-y-6">
                     {/* Name and Organization */}
@@ -119,13 +136,13 @@ export default function EmailForm() {
                             <Label htmlFor="email" className="block mb-2">
                                 Your Email <span className="text-red-500">*</span>
                             </Label>
-                            <Input id="email" type="email" placeholder="Your Email" required onChange={(e) => setEmail(e.target.value)}  />
+                            <Input id="email" type="email" placeholder="Your Email" required onChange={(e) => setEmail(e.target.value)} />
                         </div>
                         <div>
                             <Label htmlFor="contact" className="block mb-2">
                                 Your Contact <span className="text-red-500">*</span>
                             </Label>
-                            <Input id="contact" type="tel" placeholder="Your Contact" required  onChange={(e) => setPhone(e.target.value)} />
+                            <Input id="contact" type="tel" placeholder="Your Contact" required onChange={(e) => setPhone(e.target.value)} />
                         </div>
                     </div>
 
@@ -134,7 +151,7 @@ export default function EmailForm() {
                         <Label htmlFor="website" className="block mb-2">
                             Website / Social Media Link <span className="text-gray-500 italic">(If Any)</span>
                         </Label>
-                        <Input id="website" placeholder="Your Website" onChange={(e) => setLink(e.target.value)}  />
+                        <Input id="website" placeholder="Your Website" onChange={(e) => setLink(e.target.value)} />
                     </div>
 
                     {/* Services */}
@@ -165,7 +182,7 @@ export default function EmailForm() {
                         <Label htmlFor="investment" className="block mb-2">
                             How much are you looking to invest in this project? (Our starting rate of Branding projects is ₹1,20,000) <span className="text-red-500">*</span>
                         </Label>
-                        <Select onValueChange={(value) =>{setBudget(value)}}>
+                        <Select onValueChange={(value) => { setBudget(value) }}>
                             <SelectTrigger id="investment">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -182,7 +199,7 @@ export default function EmailForm() {
                         <Label htmlFor="reference" className="block mb-2">
                             And lastly, how did you hear about us? <span className="text-red-500">*</span>
                         </Label>
-                        <Select onValueChange={(value) =>{setReferal(value)}}>
+                        <Select onValueChange={(value) => { setReferal(value) }}>
                             <SelectTrigger id="reference">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -196,10 +213,30 @@ export default function EmailForm() {
                     </div>
 
                     {/* Submit */}
-                    <Button  onClick={sendEmail} className="w-full">
-                        Let&apos;s Connect!
-                    </Button>
+                    <div className='relative'>
+                        <GlowEffect
+                            colors={['#FF5733', '#33FF57', '#3357FF', '#F1C40F']}
+                            mode='colorShift'
+                            blur='soft'
+                            duration={3}
+                            scale={1.01}
+                        />
+                        <Button onClick={sendEmail} className="w-full relative inline-flex items-center gap-1 rounded-md bg-zinc-950 px-2.5 py-1.5 text-sm text-zinc-50 outline outline-1 outline-[#fff2f21f]">
+                            Let&apos;s Connect!
+                        </Button>
+                    </div>
                 </form>
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Missing required fields</DialogTitle>
+                            <DialogDescription>
+                                Please check all the fields are added and are valid. Thank you!!
+                            </DialogDescription>
+                        </DialogHeader>
+                    </DialogContent>
+                </Dialog>
+
             </div>
         </div>
     );
